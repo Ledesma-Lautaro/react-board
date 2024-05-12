@@ -43,6 +43,7 @@ export const BoardCard = ({
         addSuffix: true,
     
     });
+    
 
     const {
         mutate: onFavorite,

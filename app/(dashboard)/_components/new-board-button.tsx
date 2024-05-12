@@ -21,7 +21,7 @@ export const NewBoardButton = ({
     const onClick = () => {
         mutate({
             orgId,
-            title: "untitled",
+            title: "Untitled",
         })
         .then((id) => {
             toast.success("Board created successfully")
