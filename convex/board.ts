@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { error } from "console";
 
 const images = [
@@ -173,3 +173,11 @@ export const unfavorite = mutation({
 
     },
 })
+
+export const get = query({
+    args: {id: v.id("boards")},
+    handler: async(ctx, args) => {
+        const board = await ctx.db.get(args.id);
+        return board;
+    },
+});
