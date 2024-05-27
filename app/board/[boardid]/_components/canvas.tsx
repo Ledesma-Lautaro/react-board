@@ -128,6 +128,50 @@ export const Canvas = ({
         }
     }, [])
 
+    const insertPath = useMutation((
+        {storage, self},
+    ) => {
+
+    }, [])
+
+    const startDrawing = useMutation((
+        {setMyPresence},
+        point: Point,
+        pressure: number,
+    ) => {
+        setMyPresence({
+            pencilDraft: [[point.x, point.y, pressure]],
+            penColor: lastUsedColor,
+
+        })
+    }, [lastUsedColor]);
+
+    const continueDrawing = useMutation((
+        {self, setMyPresence},
+        point: Point,
+        e: React.PointerEvent,
+    ) => {
+        const { pencilDraft } = self.presence;
+
+        if(
+            canvasState.mode !== CanvasMode.Pencil||
+            e.button !== 1 ||
+            pencilDraft == null
+        ){
+            return;
+        }
+
+        setMyPresence({
+            cursor: point,
+            pencilDraft:
+                pencilDraft.length === 1 &&
+                pencilDraft[0][0] === point.x &&
+                pencilDraft[0][1] === point.y
+                ? pencilDraft
+                : [...pencilDraft, [point.x, point.y, e.pressure]],
+        });
+    }, [canvasState.mode]);
+
     const updateSelectionNet = useMutation((
         { storage, setMyPresence},
         current: Point,
@@ -234,12 +278,18 @@ export const Canvas = ({
         else if(canvasState.mode === CanvasMode.Resizing){
             resizeSelectedLayer(current);
         }
+        else if(canvasState.mode === CanvasMode.Pencil){
+            continueDrawing(current, e);
+            
+        }
 
         setMyPresence({cursor: current});
     }, [
+        continueDrawing,
         canvasState,
         resizeSelectedLayer,
         translateSelectedLayers,
+        updateSelectionNet,
     ]);
 
     const onPointerLeave = useMutation((
@@ -258,13 +308,16 @@ export const Canvas = ({
             return;
         }
 
-        //add for drawing
+        if(canvasState.mode === CanvasMode.Pencil){
+            startDrawing(point, e.pressure);
+            return;
+        }
 
         setCanvasState({
             origin: point,
             mode: CanvasMode.Pressing,
         })
-    }, [camera, canvasState.mode, setCanvasState])
+    }, [camera, canvasState.mode, setCanvasState, startDrawing])
 
     const onPointerUp = useMutation((
         {},
@@ -278,6 +331,8 @@ export const Canvas = ({
                 mode: CanvasMode.None,
             });
             
+        } else if( canvasState.mode === CanvasMode.Pencil) {
+            insertPath();
         } else if(canvasState.mode === CanvasMode.Inserting){
             insertLayer(canvasState.layerType, point);
         } else{
@@ -289,11 +344,13 @@ export const Canvas = ({
         history.resume();
     },
      [
+        setCanvasState,
         camera,
         canvasState,
         history,
         insertLayer,
         unselectLayers,
+        insertPath,
     ]
     );
 
