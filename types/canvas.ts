@@ -2,8 +2,6 @@ export type Color = {
     r: number;
     g: number;
     b: number;
-    a: number;
-
 };
 
 export type Camera ={
@@ -23,8 +21,8 @@ export type RectangleLayer = {
     type: LayerType.Rectangle;
     x: number;
     y: number;
-    width: number;
     height: number;
+    width: number;
     fill: Color;
     value?: string;
 };
@@ -94,31 +92,32 @@ export type CanvasState=
  | {
     mode: CanvasMode.None;
  }
- |{
-    mode: CanvasMode.Pressing,
-    origin: Point;
- }
- |{
-    mode: CanvasMode.Translating,
-    current: Point;
- }
- |{
-    mode: CanvasMode.Inserting,
-    layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Path | LayerType.Text | LayerType.Note;
- }
- |{
+ | {
     mode: CanvasMode.SelectionNet,
     origin: Point;
     current? : Point;
  }
- |{
+ | {
+    mode: CanvasMode.Translating,
+    current: Point;
+ }
+ | {
+    mode: CanvasMode.Inserting,
+    layerType:  LayerType.Ellipse | LayerType.Rectangle | LayerType.Text | LayerType.Note;
+ }
+ | {
+    mode: CanvasMode.Pencil;
+ }
+ | {
+    mode: CanvasMode.Pressing,
+    origin: Point;
+ }
+ | {
     mode: CanvasMode.Resizing,
     initialBounds: XYWH;
     corner: Side;
- }
- |{
-    mode: CanvasMode.Pencil;
- }
+ };
+ 
 
 export enum CanvasMode{
     None,
@@ -129,3 +128,5 @@ export enum CanvasMode{
     Resizing,
     Pencil
 };
+
+export type Layer = RectangleLayer | EllipseLayer | PathLayer | TextLayer | NoteLayer;
